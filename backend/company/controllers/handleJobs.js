@@ -1,4 +1,4 @@
-const { createJobIfNotExists,getStudentJobsData} = require("../services.js");
+const { createJobIfNotExists } = require("../services.js");
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -108,61 +108,22 @@ const updateJob = async (req,res) => {
     return res.status(200).json({message:"Successfully updated",data : updatedJob})
 }
 
-const deleteJob = async (req, res) => {
-  try {
+const deleteJob = async (req,res) => {
     const job_id = Number(req.params.id);
     const companyEmail = req.companyEmail;
 
     const company = await prisma.companies.findFirst({
-      where: { email: companyEmail }
+        where: { email: companyEmail }
     });
-
     if (!company) {
-      return res.status(404).json({ message: "Company not found" });
+        return res.status(404).json({ message: "Company not found" });
     }
-
-    // Step 1: Delete related applications
-    await prisma.applications.deleteMany({
-      where: { jobId: job_id }
-    });
-
-    // Step 2: Delete job
+    const companyId = company.companyId;
     await prisma.jobs.delete({
-      where: { jobId: job_id }
+        where: { jobId: job_id ,companyId:companyId},
     });
-
-    return res.status(200).json({ message: "Job Deleted Successfully" });
-
-  } catch (err) {
-    console.log("Error deleting job:", err);
-    return res.status(500).json({ message: "Could not delete job", error: err });
-  }
-};
-
-
-const getNumberOfStudentsApplied = async (req,res) => {
-  const companyEmail = req.companyEmail
-  const {jobId} = req.query;
-  try{
-    const studentsApplied = await getStudentJobsData(companyEmail, jobId);
-
-    const applications = studentsApplied.Applications.map((app) => ({
-    ...app,
-    student: {
-        ...app.student,
-        phoneNumber: app.student.phoneNumber?.toString()  // BIGINT → string
-    }
-    }));
-
-    return res.status(200).json({
-    message: "Successfully got the information",
-    data: applications,
-    count: applications.length
-    });
-  }catch(err){
-    return res.status(404).json({message: "Could not get the data required",error:err})
-  }
-
+    return res.status(200).json({message:"Job Deleted Successfully"})
 }
 
-module.exports = {createJobs,getJobs,updateJob,deleteJob,getJobById,getNumberOfStudentsApplied};
+
+module.exports = {createJobs,getJobs,updateJob,deleteJob,getJobById};
