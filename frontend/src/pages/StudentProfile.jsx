@@ -102,10 +102,7 @@ const StudentProfile = () => {
             </div>
         );
     }
-    const handleLogout = () => {
-        localStorage.removeItem('studentToken');
-        navigate('/login');
-    };
+
 
     return (
         <div className="profile-container">
@@ -401,9 +398,7 @@ const StudentProfile = () => {
                         )}
                     </div>
                 </div>
-                <button className="btn btn-outline" onClick={handleLogout} style={{ marginTop: '20px' }}>
-                    Log Out
-                </button>
+
             </div>
         </div>
     );

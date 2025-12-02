@@ -29,7 +29,7 @@ const CompanyProfile = () => {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch company data');
             }
@@ -111,10 +111,7 @@ const CompanyProfile = () => {
             </div>
         );
     }
-    const handleLogOut = () => {
-        localStorage.removeItem('companyToken');
-        navigate('/');
-    }
+
 
     return (
         <div className="profile-container">
@@ -425,9 +422,7 @@ const CompanyProfile = () => {
                         </div>
                     )}
                 </div>
-                <button className="btn btn-outline" onClick={handleLogOut} style={{marginTop:'20px'}}>
-                    Log Out
-                </button>
+
             </div>
         </div>
     );

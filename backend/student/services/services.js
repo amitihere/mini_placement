@@ -1,4 +1,4 @@
-const {PrismaClient} = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt')
 const prisma = new PrismaClient();
 const salt = 10
@@ -10,21 +10,21 @@ const createStudentSignup = async (studentData) => {
 
     const alreadyExists = await prisma.students.findFirst({
         where: {
-            OR:[
-                {email : studentData.email},
-                {phoneNumber : phoneAsBigInt}
+            OR: [
+                { email: studentData.email },
+                { phoneNumber: phoneAsBigInt }
             ]
         }
     })
-    if(alreadyExists){
+    if (alreadyExists) {
         throw new Error("Student with given email or phone number already exists");
     }
-    const hashedPass = await bcrypt.hash(studentData.password,salt)
+    const hashedPass = await bcrypt.hash(studentData.password, salt)
 
     const created = await prisma.students.create({
-        data:{ 
+        data: {
             ...studentData,
-            phoneNumber:phoneAsBigInt,
+            phoneNumber: phoneAsBigInt,
             password: hashedPass
         }
     })
@@ -35,17 +35,17 @@ const createStudentSignup = async (studentData) => {
 
 const checkStudentLogin = async (studentData) => {
     console.log("Entered check student login service")
-    
+
     const checkLogin = await prisma.students.findFirst({
-        where: {email : studentData.email}
+        where: { email: studentData.email }
     })
 
-    if(!checkLogin){
+    if (!checkLogin) {
         throw new Error("Student with the credentials not found")
     }
-    const comparedPass = await bcrypt.compare(studentData.password,checkLogin.password)
+    const comparedPass = await bcrypt.compare(studentData.password, checkLogin.password)
 
-    if(!comparedPass){
+    if (!comparedPass) {
         throw new Error("student has entered incorrect password")
     }
 
@@ -78,7 +78,7 @@ const applicationToJob = async (studentEmail, jobId) => {
             email: studentEmail
         }
     });
-    if(!student){
+    if (!student) {
         throw new Error("Student not found");
     }
     const existingApplication = await prisma.applications.findFirst({
@@ -87,7 +87,7 @@ const applicationToJob = async (studentEmail, jobId) => {
             jobId: jobId
         }
     })
-    if(existingApplication){
+    if (existingApplication) {
         throw new Error("Already applied to the job before")
     }
     const applied = await prisma.applications.create({
@@ -99,16 +99,22 @@ const applicationToJob = async (studentEmail, jobId) => {
     return applied
 }
 
-const studentUpdated = async (studentEmail,updateData) => {
+const studentUpdated = async (studentEmail, updateData) => {
+    const { student_id, email, ...dataToUpdate } = updateData;
+
+    if (dataToUpdate.phoneNumber) {
+        dataToUpdate.phoneNumber = BigInt(dataToUpdate.phoneNumber);
+    }
+
     const info = await prisma.students.update({
-        where:{email:studentEmail},
-        data:{...updateData}
+        where: { email: studentEmail },
+        data: dataToUpdate
     })
     return info
 }
 
 const fetchAppliedJobs = async (studentEmail) => {
-    console.log("Entered fetch applied jobs service",studentEmail)
+    console.log("Entered fetch applied jobs service", studentEmail)
     const appliedStudents = await prisma.students.findFirst({
         where: {
             email: studentEmail
@@ -119,10 +125,11 @@ const fetchAppliedJobs = async (studentEmail) => {
             studentId: appliedStudents.student_id
         },
         select: {
-            jobId: true
+            jobId: true,
+            status: true
         }
     })
     console.log("Applied jobs fetched:", application)
     return application
 }
-module.exports = {createStudentSignup,checkStudentLogin,studentInformation,fetchJobsForStudent,applicationToJob,studentUpdated,fetchAppliedJobs}
+module.exports = { createStudentSignup, checkStudentLogin, studentInformation, fetchJobsForStudent, applicationToJob, studentUpdated, fetchAppliedJobs }

@@ -8,8 +8,8 @@ const postCompany = async (req, res) => {
   const companyData = req.body;
   try {
     const newCompany = await createCompanyifnotExists(companyData);
-    const token = jwt.sign({ email:newCompany.email }, JWT_SECRET, { expiresIn: '7d' });
-    return res.status(201).json({message:"signup successful",data:newCompany,token:token});
+    const token = jwt.sign({ email: newCompany.email }, JWT_SECRET, { expiresIn: '7d' });
+    return res.status(201).json({ message: "signup successful", data: newCompany, token: token });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -71,7 +71,7 @@ const companydashboard = async (req, res) => {
 const updateCompanyProfile = async (req, res) => {
   try {
     const loggedInEmail = req.companyEmail;
-    const updateData = req.body;
+    const { companyId, email, ...updateData } = req.body; // Exclude companyId and email
 
     const updatedCompany = await updateCompany(loggedInEmail, updateData);
 

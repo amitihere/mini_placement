@@ -46,7 +46,7 @@ const StudentDashboard = () => {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       const appliedData = await appliedRes.json();
-      setAlreadyApplied(appliedData.data || []); // → [{ jobId }, { jobId }]
+      setAlreadyApplied(appliedData.data || []); // → [{ jobId, status }, { jobId, status }]
 
       setStudentData(profileData.data);
       setJobs(jobsList);
@@ -58,9 +58,19 @@ const StudentDashboard = () => {
     }
   };
 
-  const hasAlreadyApplied = (jobId) => alreadyApplied.some(a => a.jobId === jobId);
+  const getApplicationStatus = (jobId) => {
+    const application = alreadyApplied.find(a => a.jobId === jobId);
+    return application ? application.status : null;
+  };
+
+  const hasAlreadyApplied = (jobId) => !!getApplicationStatus(jobId);
 
   const handleProfileClick = () => navigate(`/student/profile`);
+
+  const handleLogout = () => {
+    localStorage.removeItem('studentToken');
+    navigate('/');
+  };
 
   const handleApply = async (jobId) => {
     if (hasAlreadyApplied(jobId)) {
@@ -81,7 +91,7 @@ const StudentDashboard = () => {
       const response = await res.json();
       if (res.ok) {
         alert("Applied successfully!");
-        setAlreadyApplied(prev => [...prev, { jobId }]); // instant UI update
+        setAlreadyApplied(prev => [...prev, { jobId, status: 'Applied' }]); // instant UI update
       } else {
         alert(response.message || 'Failed to apply');
       }
@@ -115,6 +125,7 @@ const StudentDashboard = () => {
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.logo}>PlacementHub</div>
+        <button style={{ ...styles.profileButton, marginLeft: 'auto',marginRight: '8px',backgroundColor:'#f6f3f3ff',transition: 'opacity 0.2s' }} onClick={handleLogout}>Log Out</button>
         <button style={styles.profileButton} onClick={handleProfileClick}>Student Profile</button>
       </div>
 
@@ -179,9 +190,14 @@ const StudentDashboard = () => {
                   <button
                     style={{
                       ...styles.applyButton,
-                      backgroundColor: hasAlreadyApplied(job.jobId) ? '#555555' : '#ffffff',
-                      color: hasAlreadyApplied(job.jobId) ? '#cccccc' : '#000000',
-                      cursor: hasAlreadyApplied(job.jobId) ? 'not-allowed' : 'pointer'
+                      backgroundColor: hasAlreadyApplied(job.jobId) ?
+                        (getApplicationStatus(job.jobId) === 'Shortlisted' ? '#22c55e' :
+                          getApplicationStatus(job.jobId) === 'Rejected' ? '#ef4444' :
+                            '#555555')
+                        : '#ffffff',
+                      color: hasAlreadyApplied(job.jobId) ? '#ffffff' : '#000000',
+                      cursor: hasAlreadyApplied(job.jobId) ? 'default' : 'pointer',
+                      opacity: hasAlreadyApplied(job.jobId) ? 0.9 : 1
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -190,7 +206,7 @@ const StudentDashboard = () => {
                     disabled={hasAlreadyApplied(job.jobId) || applying === job.jobId}
                   >
                     {hasAlreadyApplied(job.jobId)
-                      ? "Applied"
+                      ? getApplicationStatus(job.jobId)
                       : applying === job.jobId
                         ? "Applying..."
                         : "Apply"}
@@ -228,11 +244,11 @@ const styles = {
   },
   header: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: '1.5rem 3rem',
     borderBottom: '1px solid #333333',
-  },
+    justifyContent: 'flex-start',
+},
   logo: {
     fontSize: '1.5rem',
     fontWeight: 'bold',
@@ -247,7 +263,7 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'opacity 0.2s',
-  },
+},
   welcomeSection: {
     padding: '4rem 3rem 2rem',
     textAlign: 'center',

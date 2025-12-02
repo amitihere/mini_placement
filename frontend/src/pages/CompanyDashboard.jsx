@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ListOfJobs from './ListOfJobs';
+import ListOfJobs from './Listofjobs';
 import '../components/styles/global.css';
 
 const CompanyDashboard = () => {
@@ -82,6 +82,11 @@ const CompanyDashboard = () => {
         navigate('/dashboard/job/new');
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('companyToken');
+        navigate('/');
+    };
+
     if (loading) {
         return (
             <div style={styles.loadingContainer}>
@@ -106,6 +111,9 @@ const CompanyDashboard = () => {
             {/* Header with Profile Button */}
             <div style={styles.header}>
                 <div style={styles.logo}>PlacementHub</div>
+                <button style={{ ...styles.profileButton, marginLeft: 'auto',marginRight: '8px',backgroundColor:'#f6f3f3ff',transition: 'opacity 0.2s'}} onClick={handleLogout}>
+                    Log Out
+                </button>
                 <button style={styles.profileButton} onClick={handleProfileClick}>
                     Company Profile
                 </button>
@@ -171,27 +179,27 @@ const styles = {
         fontFamily: "'Inter', sans-serif",
     },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1.5rem 3rem',
-        borderBottom: '1px solid #333333',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '1.5rem 3rem',
+    borderBottom: '1px solid #333333',
+    justifyContent: 'flex-start',
     },
     logo: {
         fontSize: '1.5rem',
         fontWeight: 'bold',
     },
     profileButton: {
-        backgroundColor: '#ffffff',
-        color: '#000000',
-        border: 'none',
-        padding: '0.75rem 1.5rem',
-        borderRadius: '6px',
-        fontSize: '0.95rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'opacity 0.2s',
-    },
+    backgroundColor: '#f9f6f6ff',
+    color: '#000000',
+    border: 'none',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '6px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'opacity 0.2s',
+},
     welcomeSection: {
         padding: '4rem 3rem 2rem',
         textAlign: 'center',
